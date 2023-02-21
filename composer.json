@@ -1,0 +1,38 @@
+{
+    "name": "darvis/manta-laravel-uploads",
+    "description": "Laravel Livewire uploads module with TinyMce 6 (multilingual)",
+    "homepage": "http://darvis.nl",
+    "keywords": ["darvis", "laravel", "livewire", "uploads"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Arvid de Jong",
+            "email": "arvid@darvis.nl",
+            "homepage": "https://darvis.nl"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Manta\\LaravelUploads\\Providers\\MantaUploadsProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Manta\\LaravelUploads\\": "/src"
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/darviscommerce/laravel-uploads"
+        }
+    ],
+    "require": {
+        "darvis/lemmings": ">=1.0.0",
+        "darvis/manta-laravel-cms": "*",
+        "php-flasher/flasher-laravel": "*",
+        "php-flasher/flasher-toastr-laravel": "*"
+    }
+}
