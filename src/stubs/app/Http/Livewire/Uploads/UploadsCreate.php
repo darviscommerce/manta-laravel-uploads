@@ -1,28 +1,42 @@
 <?php
 
-namespace Manta\LaravelUploads\Http\Livewire\Uploads;
+namespace App\Http\Livewire\Uploads;
 
-use Manta\LaravelUploads\Models\MantaUpload;
+use App\Models\MantaUpload;
 use Illuminate\Http\Request;
 use Livewire\Component;
 use Illuminate\Support\Str;
+use Livewire\WithFileUploads;
 
 class UploadsCreate extends Component
 {
+    use WithFileUploads;
+
+    public $files;
+
     public ?MantaUpload $item = null;
 
-    public ?string $added_by = null;
-    public ?string $changed_by = null;
-    public ?string $company_id = '1';
+    public ?string $sort = null;
+    public ?string $main = null;
+    public ?string $created_by = null;
+    public ?string $updated_by = null;
+    public ?string $user_id = null;
+    public ?string $company_id = null;
     public ?string $host = null;
-    public ?string $pid = null;
     public ?string $locale = null;
     public ?string $title = null;
-    public ?string $slug = null;
     public ?string $seo_title = null;
-    public ?string $seo_description = null;
-    public ?string $excerpt = null;
-    public ?string $content = null;
+    public ?string $disk = null;
+    public ?string $location = null;
+    public ?string $filename = null;
+    public ?string $extension = null;
+    public ?string $mime = null;
+    public ?string $size = null;
+    public ?string $model = null;
+    public ?string $pid = null;
+    public ?string $identifier = null;
+    public ?string $originalName = null;
+    public ?string $description = null;
 
     public function mount(Request $request)
     {
@@ -39,7 +53,7 @@ class UploadsCreate extends Component
 
     public function render()
     {
-        return view('manta-laravel-uploads::livewire.uploads.uploads-create')->layout('manta-laravel-cms::layouts.manta-bootstrap');
+        return view('livewire.uploads.uploads-create')->layout('layouts.manta-bootstrap');
     }
 
     public function updatedTitle()
@@ -64,20 +78,10 @@ class UploadsCreate extends Component
             ]
         );
 
-        $items = [
-            'added_by' => auth()->user()->name,
-            'company_id' => (int)$this->company_id,
-            'host' => $this->host,
-            'pid' => $this->pid,
-            'locale' => $this->locale,
-            'title' => $this->title,
-            'slug' => Str::of($this->slug)->slug('-'),
-            'seo_title' => $this->seo_title,
-            'seo_description' => $this->seo_description,
-            'excerpt' => $this->excerpt,
-            'content' => $this->content
-        ];
-        MantaUpload::create($items);
+        foreach($this->files as $file)
+        {
+            (new MantaUpload)->upload($file, ['private' => 1]);
+        }
 
         toastr()->addInfo('Item opgeslagen');
 

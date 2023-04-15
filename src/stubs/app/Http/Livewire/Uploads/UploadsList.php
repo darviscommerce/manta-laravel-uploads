@@ -1,9 +1,9 @@
 <?php
 
-namespace Manta\LaravelUploads\Http\Livewire\Uploads;
+namespace App\Http\Livewire\Uploads;
 
-use Manta\LaravelUploads\Models\MantaUpload;
-use Manta\LaravelCms\Traits\WithSorting;
+use App\Models\MantaUpload;
+use App\Traits\WithSorting;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -29,7 +29,7 @@ class UploadsList extends Component
 
     public function render()
     {
-        $obj = MantaUpload::where('locale', config('manta-cms.locale'))->orderBy($this->sortBy, $this->sortDirection);
+        $obj = MantaUpload::orderBy($this->sortBy, $this->sortDirection);
         if($this->show == 'trashed'){
             $obj->onlyTrashed();
         }
@@ -42,7 +42,7 @@ class UploadsList extends Component
         // ->where('name', 'like', '%'.$this->search.'%')->orWhere('email', 'like', '%'.$this->search.'%');
         }
         $items = $obj->paginate(20);
-        return view('manta-laravel-uploads::livewire.uploads.uploads-list', ['items' => $items])->layout('manta-laravel-cms::layouts.manta-bootstrap');
+        return view('livewire.uploads.uploads-list', ['items' => $items])->layout('layouts.manta-bootstrap');
     }
 
     public function loadTrash()
@@ -67,7 +67,7 @@ class UploadsList extends Component
 
     public function deleteConfirm()
     {
-        MantaUpload::find($this->deleteId)->delete();
+        MantaUpload::find($this->deleteId)->remove();
         $this->deleteId = null;
         $this->trashed = count(MantaUpload::onlyTrashed()->get());
     }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Manta\LaravelUploads\Http\Livewire\Uploads;
+namespace App\Http\Livewire\Uploads;
 
-use Manta\LaravelUploads\Models\MantaUpload;
+use App\Models\MantaUpload;
 use Illuminate\Http\Request;
 use Livewire\Component;
 use Illuminate\Support\Str;
@@ -11,8 +11,8 @@ class UploadsUpdate extends Component
 {
     public MantaUpload $item;
 
-    public ?string $added_by = null;
-    public ?string $changed_by = null;
+    public ?string $created_by = null;
+    public ?string $updated_by = null;
     public ?string $company_id = '1';
     public ?string $host = null;
     public ?string $locale = null;
@@ -36,8 +36,8 @@ class UploadsUpdate extends Component
             return redirect()->to(route('manta.uploads.list'));
         }
         $this->item = $item;
-        $this->added_by = $item->added_by;
-        $this->changed_by = $item->changed_by;
+        $this->created_by = $item->created_by;
+        $this->updated_by = $item->updated_by;
         $this->company_id = $item->company_id;
         $this->host = $item->host;
         $this->locale = $item->locale;
@@ -51,7 +51,7 @@ class UploadsUpdate extends Component
 
     public function render()
     {
-        return view('manta-laravel-uploads::livewire.uploads.uploads-update')->layout('manta-laravel-cms::layouts.manta-bootstrap');
+        return view('livewire.uploads.uploads-update')->layout('layouts.manta-bootstrap');
     }
 
     public function store($input)
@@ -68,7 +68,7 @@ class UploadsUpdate extends Component
         );
 
         $items = [
-            'added_by' => auth()->user()->name,
+            'created_by' => auth()->user()->name,
             'locale' => $this->locale,
             'title' => $this->title,
             'slug' => Str::of($this->slug)->slug('-'),

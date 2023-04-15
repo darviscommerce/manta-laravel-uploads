@@ -27,6 +27,7 @@
     <table class="table table-sm table-hover table-striped">
         <thead>
             <tr>
+                <th></th>
                 <th>Titel</th>
                 <th>SEO Titel</th>
                 <th width="250">Tools</th>
@@ -35,6 +36,7 @@
         <tbody>
             @foreach ($items as $item)
                 <tr>
+                    <td>@if($item->image()['src']) <a href="{{ $item->image()['url'] }}" data-fancybox="gallery" data-caption="{{ $item->title }}"><img src="{{ $item->image()['src'] }}" style="height: 50px;"></a> @else <i class="fa-solid fa-triangle-exclamation text-danger ms-4"></i> @endif</td>
                     <td>{{ $item->title }}</td>
                     <td>{{ $item->seo_title }}</td>
                     <td>
@@ -43,6 +45,7 @@
                         @elseif ($deleteId == null || $deleteId != $item->id)
                             <a href="{{ route('manta.uploads.update', ['input' => $item->id]) }}" class="btn btn-sm btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
                             <button wire:click="delete('{{ $item->id }}')" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash-can"></i></button>
+                            @if($item->image()['src'])<a href="{{ route('manta.uploads.crop', ['input' => $item->id]) }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-crop"></i></a>@endif
                         @elseif($deleteId == $item->id)
                             Verwijder?
                             <button class="btn btn-sm btn-success" wire:click="deleteConfirm"><i class="fa-solid fa-check"></i></button>

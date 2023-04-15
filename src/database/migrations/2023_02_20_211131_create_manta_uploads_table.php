@@ -17,14 +17,16 @@ return new class extends Migration
             $table->softDeletes();
             $table->integer('sort')->default(0);
             $table->tinyInteger('main')->default(0);
-            $table->string('added_by')->nullable();
-            $table->string('changed_by')->nullable();
+            $table->string('created_by')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->string('deleted_by')->nullable();
             $table->integer('user_id')->nullable();
             $table->integer('company_id')->nullable();
             $table->string('host')->nullable();
             $table->string('locale')->nullable();
             $table->string('title')->nullable();
             $table->string('seo_title')->nullable();
+            $table->boolean('private')->default(0);
             $table->string('disk')->nullable();
             $table->string('location')->nullable();
             $table->string('filename')->nullable();

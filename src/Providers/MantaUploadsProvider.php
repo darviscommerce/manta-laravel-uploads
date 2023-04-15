@@ -6,9 +6,12 @@ use Manta\LaravelUploads\Console\InstallMantaLaravelUploads;
 use Manta\LaravelUploads\Http\Livewire\Uploads\UploadsCreate;
 use Manta\LaravelUploads\Http\Livewire\Uploads\UploadsList;
 use Manta\LaravelUploads\Http\Livewire\Uploads\UploadsUpdate;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
+use Manta\LaravelUploads\Http\Livewire\Uploads\UploadsUpload;
+use Manta\LaravelUploads\View\Components\Manta\ComponentUpload;
 
 class MantaUploadsProvider extends ServiceProvider
 {
@@ -23,15 +26,18 @@ class MantaUploadsProvider extends ServiceProvider
     {
 
         // * Routes
-        $this->registerRoutes();
+        // $this->registerRoutes();
 
         // * Laravel components
-        Livewire::component('uploads-create', UploadsCreate::class);
-        Livewire::component('uploads-update', UploadsUpdate::class);
-        Livewire::component('uploads-list', UploadsList::class);
+        // Livewire::component('uploads-create', UploadsCreate::class);
+        // Livewire::component('uploads-update', UploadsUpdate::class);
+        // Livewire::component('uploads-list', UploadsList::class);
+        // Livewire::component('uploads-upload', UploadsUpload::class);
+
+        // Blade::component('component-upload', ComponentUpload::class);
 
         // * Views
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'manta-laravel-uploads');
+        // $this->loadViewsFrom(__DIR__ . '/../resources/views', 'manta-laravel-uploads');
 
         // * Migrations
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');

@@ -4,6 +4,7 @@
     "homepage": "http://darvis.nl",
     "keywords": ["darvis", "laravel", "livewire", "uploads"],
     "license": "MIT",
+    "version": "1.0.13",
     "authors": [
         {
             "name": "Arvid de Jong",
@@ -30,9 +31,11 @@
         }
     ],
     "require": {
-        "darvis/lemmings": ">=1.0.0",
+        "darvis/lemmings": "*",
         "darvis/manta-laravel-cms": "*",
         "php-flasher/flasher-laravel": "*",
-        "php-flasher/flasher-toastr-laravel": "*"
+        "php-flasher/flasher-toastr-laravel": "*",
+        "matthewbdaly/laravel-azure-storage": "*",
+        "intervention/image": "*"
     }
 }
