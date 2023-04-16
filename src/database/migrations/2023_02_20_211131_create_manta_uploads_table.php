@@ -37,7 +37,10 @@ return new class extends Migration
             $table->string('pid')->nullable();
             $table->string('identifier')->nullable();
             $table->string('originalName')->nullable();
-            $table->text('description')->nullable();
+            $table->boolean('pdfLock')->default(0);
+            $table->text('comments')->nullable();
+            $table->text('error')->nullable();
+            $table->integer('pages')->default(0);
         });
     }
 

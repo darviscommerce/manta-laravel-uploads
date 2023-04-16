@@ -36,6 +36,8 @@
         "php-flasher/flasher-laravel": "*",
         "php-flasher/flasher-toastr-laravel": "*",
         "matthewbdaly/laravel-azure-storage": "*",
-        "intervention/image": "*"
+        "intervention/image": "*",
+        "setasign/fpdf": "*",
+        "setasign/fpdi": "*"
     }
 }
