@@ -4,20 +4,23 @@ namespace App\Http\Livewire\Uploads;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\MantaUpload;
+use Manta\LaravelUploads\Models;
 
 class UploadsUpload extends Component
 {
 
     use WithFileUploads;
 
-    public $documents = [];
-    public $max_upload_size = 1024;
+    public mixed $documents = [];
+    public int $max_upload_size = 1024;
+
+    public mixed $pid;
+    public string $model;
 
     public function mount()
     {
         $upload = new MantaUpload();
-        $this->max_upload_size = $upload->file_upload_max_size()/1024;
+        $this->max_upload_size = $upload->file_upload_max_size() / 1024;
     }
 
     public function render()
@@ -29,18 +32,23 @@ class UploadsUpload extends Component
     public function updatedDocuments()
     {
         $this->validate([
-            'documents.*' => 'image|max:'.$this->max_upload_size,
+            'documents.*' => 'image|max:' . $this->max_upload_size,
         ]);
     }
 
     public function store($input)
     {
         $this->validate([
-            'documents.*' => 'image|max:'.$this->max_upload_size, // 1MB Max
+            'documents.*' => 'image|max:' . $this->max_upload_size, // 1MB Max
         ]);
 
+        $this->emit('uploadsCreated');
+
+        $upload = new MantaUpload();
         foreach ($this->documents as $photo) {
-            $photo->store('photos');
+            $upload->upload($photo, ['pid' => $this->pid, 'model' => $this->model]);
         }
+
+        $this->documents = [];
     }
 }

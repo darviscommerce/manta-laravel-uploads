@@ -23,6 +23,6 @@ class ComponentUpload extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('manta-laravel-uploads::components.manta.component-upload');
+        return view('components.manta.component-upload');
     }
 }

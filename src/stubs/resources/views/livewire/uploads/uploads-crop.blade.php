@@ -28,12 +28,24 @@
         <div class="row mt-4">
             <div class="col">
 
-
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" wire:model.defer="replace" name="replace" id="replace" value="1" required>
+                    <label class="form-check-label" for="replace">
+                      Vervang huidige plaatje
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" wire:model.defer="replace" name="replace" value="0" id="replace2">
+                    <label class="form-check-label" for="replace2">
+                      Maak aan als nieuw plaatje
+                    </label>
+                  </div>
             </div>
         </div>
     <div class="row mt-4">
         <div class="col">
-                <button type="submit" class="btn btn-sm btn-primary"><i class="fa-solid fa-floppy-disk"></i>
+                <button type="submit" class="btn btn-sm btn-primary" wire:loading.class="btn-secondary"
+                wire:loading.attr="disabled"><i class="fa-solid fa-floppy-disk"></i>
                     Opslaan</button>
                 <a href="javascript:;" id="download" download="plaaje.jpg" class="btn btn-sm btn-primary"><i
                         class="fa-solid fa-download"></i> Download</a>

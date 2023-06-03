@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace Manta\LaravelUploads\Models;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -18,7 +18,6 @@ use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
 use Intervention\Image\ImageManagerStatic as Image;
 use setasign\Fpdi\Fpdi;
 use App\Services\PdfToImage;
-use Illuminate\Database\Eloquent\InvalidCastException;
 
 class MantaUpload extends Model
 {
@@ -48,6 +47,7 @@ class MantaUpload extends Model
         'seo_title',
         'private',
         'disk',
+        'url',
         'location',
         'filename',
         'extension',
@@ -108,6 +108,36 @@ class MantaUpload extends Model
     }
 
     /**
+     * @param int|null $size
+     * @param bool $check_exist
+     * @return string
+     * @throws BindingResolutionException
+     * @throws NotReadableException
+     * @throws ExceptionInvalidArgumentException
+     * @throws NotSupportedException
+     */
+    function full_path(int $size = null, bool $check_exist = false): string
+    {
+        if ($check_exist) {
+            $file_exist = @fopen($this->url . $this->location . 'cache/thumbnails/' . $size . '/' . $this->filename, 'r');
+        }
+        if (isset($file_exist) && !$file_exist) {
+            foreach (config('manta-uploads.thumbnails') as $resize) {
+                $this->resize($resize);
+            }
+            if (!in_array($size, config('manta-uploads.thumbnails'))) {
+                $this->resize($size);
+            }
+        }
+        if ($size != null) {
+            $file = $this->url . $this->location . 'cache/thumbnails/' . $size . '/' . $this->filename;
+        } else {
+            $file = $this->url . $this->location . $this->filename;
+        }
+        return $file;
+    }
+
+    /**
      * @return bool
      * @throws LogicException
      */
@@ -125,58 +155,99 @@ class MantaUpload extends Model
      * @throws BindingResolutionException
      * @throws SuspiciousOperationException
      */
-    public function upload(mixed $file, array $config = []): ?object
+    public function upload(mixed $file, array $config = [], ?MantaUpload $upload = null): ?object
     {
         $disk = isset($config['disk']) ? $config['disk'] : 'azure';
-        $location = isset($config['location']) ? $config['location'] : date('y') . '/' . date('m') . '/' . date('d') . '/';
+        $location = isset($config['location']) ? $config['location'] : 'uploads/' . date('y') . '/' . date('m') . '/' . date('d') . '/';
 
-        if (is_string($file)) {
-            $getClientOriginalName = $config['filename'];
-            $getClientOriginalExtension = pathinfo($config['filename'], PATHINFO_EXTENSION);
-            $getMimeType = null;
-            $getSize = null;
-            $filename = $this->uniqueFileName($getClientOriginalName, $disk, $location, false);
-            $data = $file;
+        if (preg_match('#azure#', $disk)) {
+            $url = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/';
         } else {
-            $getClientOriginalName = $file->getClientOriginalName();
-            $getClientOriginalExtension = $file->getClientOriginalExtension();
-            $getMimeType = $file->getMimeType();
-            $getSize = $file->getSize();
-            $filename = $this->uniqueFileName($getClientOriginalName, $disk, $location, true);
-            $data = Storage::disk($disk)->get($file->getRealPath());
+            $url = env('APP_URL') . '/';
         }
 
-        if (Storage::disk($disk)->put($location . $filename, $data)) {
+
+
+        if (is_string($file) && !is_object($file)) {
+            if (isset($config['replace']) && !$upload) {
+                return false;
+            }
+            if ($upload) $config['locale'] = $upload->locale;
+            if ($upload) $config['seo_title'] = $upload->seo_title;
+            if ($upload) $config['model'] = $upload->model;
+            if ($upload) $config['pid'] = $upload->pid;
+            if ($upload) $config['identifier'] = $upload->identifier;
+            if ($upload) $config['comments'] = $upload->comments;
+            //
+            $originalName = $config['filename'];
+            $extension = $upload ? $upload->extension : pathinfo($config['filename'], PATHINFO_EXTENSION);
+            $mime = $upload ? $upload->mime : null;
+            $size = $upload ? $upload->size : null;
+            if (isset($config['replace']) && $config['replace'] == 1) {
+                $disk = $upload->disk;
+                $location = $upload->location;
+                $filename = $upload->filename;
+            } else {
+                $filename = $this->uniqueFileName($originalName, $disk, $location, false);
+            }
+            $data = $file;
+            if (Storage::disk($disk)->putFileAs($location, $filename, $data)) {
+            } else {
+                return false;
+            }
+        } elseif (is_object($file)) {
+            // dd($file->getRealPath());
+            $originalName = $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension();
+            $mime = $file->getMimeType();
+            $size = $file->getSize();
+            $filename = $this->uniqueFileName($originalName, $disk, $location, true);
+            Storage::disk($disk)->makeDirectory($location);
+            if (Storage::disk($disk)->putFileAs($location, $file, $filename)) {
+                $infoPath = pathinfo(app()->path() . '/storage/app/' . $disk . '' . $location . $filename);
+                // dd($infoPath);
+            } else {
+                // dd($location, $filename, $file);
+                return false;
+            }
         } else {
             return false;
         }
 
+
         $item = [
             'sort' => isset($config['sort']) ? $config['sort'] : 0,
             'main' => isset($config['main']) ? $config['main'] : 0,
-            'created_by' => auth()->user()->name,
-            'user_id' => auth()->user()->id,
-            'company_id' => (int)$this->company_id,
-            'host'  => request()->getHost(),
-            'locale' => isset($config['locale']) ? $config['locale'] : app()->getLocale(),
-            'title' => isset($config['title']) ? $config['title'] : $getClientOriginalName,
-            'seo_title' => isset($config['identifier']) ? $config['identifier'] : $getClientOriginalName,
+            'title' => isset($config['title']) ? $config['title'] : $originalName,
+            'seo_title' => isset($config['seo_title']) ? $config['seo_title'] : $originalName,
             'disk' => $disk,
+            'url' => $url,
             'location' => $location,
             'filename' => $filename,
-            'extension' => $getClientOriginalExtension,
-            'mime' => $getMimeType,
-            'size' => $getSize,
-            'originalName' => $getClientOriginalName,
-            'model' => isset($config['model']) ? $config['model'] : null,
-            'pid' => isset($config['pid']) ? $config['pid'] : null,
-            'identifier' => isset($config['identifier']) ? $config['identifier'] : null,
+            'extension' => $extension,
+            'mime' => $mime,
+            'size' => $size,
             'comments' => isset($config['comments']) ? $config['comments'] : null,
         ];
-        $upload = MantaUpload::create($item);
+        if (isset($config['replace']) && $config['replace'] == 1 && $upload) {
+            $item['updated_by'] = auth()->user()->name;
+            MantaUpload::where('id', $upload->id)->update($item);
+        } else {
+            $item['created_by'] = auth()->user()->name;
+            $item['user_id'] = auth()->user()->id;
+            $item['locale'] = isset($config['locale']) ? $config['locale'] : app()->getLocale();
+            $item['host'] = request()->getHost();
+            $item['company_id'] = (int)$this->company_id;
+            $item['originalName'] = $originalName;
+            $item['pid'] = isset($config['pid']) ? $config['pid'] : null;
+            $item['model'] = isset($config['model']) ? $config['model'] : null;
+            $item['identifier'] = isset($config['identifier']) ? $config['identifier'] : null;
+            $upload = MantaUpload::create($item);
+        }
         if (in_array($upload->extension, ['jpg', 'jpeg', 'png'])) {
-            $upload->resize(400);
-            $upload->resize(800);
+            foreach (config('manta-uploads.thumbnails') as $size) {
+                $upload->resize($size);
+            }
         }
         if (in_array($upload->extension, ['pdf'])) {
             $upload->pdfToPages();
@@ -198,6 +269,7 @@ class MantaUpload extends Model
         try {
             $basename   = pathinfo($filename, PATHINFO_FILENAME);
             $basename   = Str::slug($basename, '-');
+            $basename   = substr($basename, 0, 20);
             $extension  = pathinfo($filename, PATHINFO_EXTENSION);
 
             if ($timename) $basename = time();
@@ -328,28 +400,24 @@ class MantaUpload extends Model
         if ($width == null) {
             $folderSize = $height;
         }
+
         $stream = Image::make(Storage::disk($this->disk)->get($this->location . $this->filename))->resize($width, $height, function ($constraint) {
             $constraint->aspectRatio();
             $constraint->upsize();
         });
-
+        // dd($this->disk, (string)$stream->encode($this->extension));
         // $test = Storage::disk($this->disk)->makeDirectory($this->location . '/../cache/thumbnails/' . $folderSize . '/', 0777);
         Storage::disk($this->disk)->put($this->location . '/cache/thumbnails/' . $folderSize . '/' . $this->filename,  (string)$stream->encode($this->extension));
         $stream->destroy();
     }
 
-    /**
-     * @return void
-     * @throws InvalidArgumentException
-     * @throws InvalidCastException
-     */
-    public function pdfToPages() : void
+    public function pdfToPages(): void
     {
         if ($this->pdfLock == 0 && $this->extension == 'pdf' && Storage::disk($this->disk)->exists($this->location . $this->filename)) {
             $this->pdfLock = 1;
             $this->save();
-            Storage::disk('local')->put("/pdf_temp/" . $this->id. "/".$this->filename, Storage::disk($this->disk)->get($this->location . $this->filename));
-            $temp_location = Storage::disk('local')->path("/pdf_temp/" . $this->id. "/".$this->filename);
+            Storage::disk('local')->put("/pdf_temp/" . $this->id . "/" . $this->filename, Storage::disk($this->disk)->get($this->location . $this->filename));
+            $temp_location = Storage::disk('local')->path("/pdf_temp/" . $this->id . "/" . $this->filename);
             /**
              * * Try to read PDF
              */

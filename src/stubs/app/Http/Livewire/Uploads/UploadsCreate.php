@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire\Uploads;
 
-use App\Models\MantaUpload;
+use Manta\LaravelUploads\Models;
 use Illuminate\Http\Request;
 use Livewire\Component;
 use Illuminate\Support\Str;
@@ -26,6 +26,7 @@ class UploadsCreate extends Component
     public ?string $locale = null;
     public ?string $title = null;
     public ?string $seo_title = null;
+    public ?string $private = null;
     public ?string $disk = null;
     public ?string $location = null;
     public ?string $filename = null;
@@ -36,15 +37,15 @@ class UploadsCreate extends Component
     public ?string $pid = null;
     public ?string $identifier = null;
     public ?string $originalName = null;
-    public ?string $description = null;
+    public ?string $comments = null;
 
     public function mount(Request $request)
     {
         $this->host = request()->getHost();
         $this->locale = config('manta-cms.locale');
-        if($request->input('pid') && $request->input('locale')){
+        if ($request->input('pid') && $request->input('locale')) {
             $this->item = MantaUpload::find($request->input('pid'));
-            if($this->item){
+            if ($this->item) {
                 $this->pid = $request->input('pid');
                 $this->locale = $request->input('locale');
             }
@@ -78,8 +79,7 @@ class UploadsCreate extends Component
             ]
         );
 
-        foreach($this->files as $file)
-        {
+        foreach ($this->files as $file) {
             (new MantaUpload)->upload($file, ['private' => 1]);
         }
 

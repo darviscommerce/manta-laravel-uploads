@@ -3,7 +3,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
             <li class="breadcrumb-item"><a href="{{ route('manta.uploads.list') }}">Uploads</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Toevoegen {{ $pid }}</li>
+            <li class="breadcrumb-item active" aria-current="page">Toevoegen</li>
         </ol>
     </nav>
 
@@ -64,7 +64,7 @@
                             style="background-image: url('{{ $file->temporaryUrl() }}'); ">
                         </div>
                     </a>
-                    <div class="mantaUploadsDescription">
+                    <div class="mantaUploadscomments">
                         <a href="javascript:;"
                         {{-- wire:click="main('d4493e00-a81f-11eb-96a3-6f0d8db49bb5')" --}}
                         ><i
@@ -85,7 +85,7 @@
         <div class="mb-3 row">
             <div class="col-sm-12">
                 {{-- @include('includes.form_error') --}}
-                <input class="btn btn-primary" type="submit" value="Opslaan" wire:loading.class="btn-secondary"
+                <input class="btn btn-sm btn-primary" type="submit" value="Opslaan" wire:loading.class="btn-secondary"
                     wire:loading.attr="disabled" />
             </div>
         </div>

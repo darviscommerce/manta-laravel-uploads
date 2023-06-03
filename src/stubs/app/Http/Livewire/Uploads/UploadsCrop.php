@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire\Uploads;
 
-use App\Models\MantaUpload;
+use Manta\LaravelUploads\Models;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
@@ -37,13 +37,14 @@ class UploadsCrop extends Component
 
     public ?string $image = null;
     public ?string $newimage = null;
+    public ?int $replace = null;
 
     public function mount(Request $request, $input)
     {
         $item = MantaUpload::find($input);
-        if($request->input('locale')){
+        if ($request->input('locale')) {
             $item = MantaUpload::where('locale', $request->input('locale'))->where('pid', $input)->first();
-            if($item == null){
+            if ($item == null) {
                 return redirect()->to(route('manta.uploads.create', ['locale' => $request->input('locale'), 'pid' => $input]));
             }
         }
@@ -52,8 +53,7 @@ class UploadsCrop extends Component
         }
         $this->item = $item;
 
-        $this->image = Image::make(Storage::disk($item->disk)->get($item->location.$item->filename))->stream('data-url');
-
+        $this->image = Image::make(Storage::disk($item->disk)->get($item->location . $item->filename))->stream('data-url');
     }
 
     public function render()
@@ -61,8 +61,19 @@ class UploadsCrop extends Component
         return view('livewire.uploads.uploads-crop')->layout('layouts.manta-bootstrap');
     }
 
-    public function store($post){
-        (new MantaUpload)->upload(file_get_contents($post['newimage']), ['private' => 1, 'filename' => 'test '.date('His').'.jpg']);
+    public function store($post)
+    {
+        $this->validate(
+            [
+                'replace' => 'required',
+            ],
+            [
+                'replace.required' => 'Actie is verplicht',
+            ]
+        );
+
+        (new MantaUpload)->upload(file_get_contents($post['newimage']), ['replace' => (int)$this->replace, 'private' => 1, 'filename' => 'test ' . date('His') . '.jpg'], $this->item);
+
+        toastr()->addInfo('Item opgeslagen');
     }
 }
-

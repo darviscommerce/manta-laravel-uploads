@@ -22,7 +22,7 @@ class InstallMantaLaravelUploads extends Command
 
         $this->info('Publishing configuration...');
 
-        if (! $this->configExists('manta-users.php')) {
+        if (!$this->configExists('manta-users.php')) {
             $this->publishConfiguration();
             $this->info('Published configuration');
         } else {
@@ -34,20 +34,20 @@ class InstallMantaLaravelUploads extends Command
             }
         }
 
-        (new Filesystem)->copyDirectory(__DIR__.'/../stubs/app/Models', app_path('Models'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../stubs/app/Http', app_path('Http'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../stubs/app/View', app_path('View'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../stubs/app/Services', app_path('Services'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../stubs/resources/views', resource_path('views'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../stubs/resources/lang', resource_path('lang'));
+        // (new Filesystem)->copyDirectory(__DIR__.'/../Models', app_path('Models'));
+        (new Filesystem)->copyDirectory(__DIR__ . '/../stubs/app/Http', app_path('Http'));
+        (new Filesystem)->copyDirectory(__DIR__ . '/../stubs/app/View', app_path('View'));
+        (new Filesystem)->copyDirectory(__DIR__ . '/../stubs/app/Services', app_path('Services'));
+        (new Filesystem)->copyDirectory(__DIR__ . '/../stubs/resources/views', resource_path('views'));
+        (new Filesystem)->copyDirectory(__DIR__ . '/../stubs/resources/lang', resource_path('lang'));
 
-        if (! Str::contains(file_get_contents(base_path('routes/web.php')), "'manta.uploads.list'")) {
+        if (!Str::contains(file_get_contents(base_path('routes/web.php')), "'manta.uploads.list'")) {
             $this->info('web.php update...');
-            (new Filesystem)->append(base_path('routes/web.php'), file_get_contents(__DIR__.'/../stubs/routes/web.php'));
+            (new Filesystem)->append(base_path('routes/web.php'), file_get_contents(__DIR__ . '/../stubs/routes/web.php'));
         }
-        if (! Str::contains(file_get_contents(base_path('.env')), "AZURE_STORAGE_NAME")) {
+        if (!Str::contains(file_get_contents(base_path('.env')), "AZURE_STORAGE_NAME")) {
             $this->info('.env update...');
-            (new Filesystem)->append(base_path('.env'), file_get_contents(__DIR__.'/../stubs/env.txt'));
+            (new Filesystem)->append(base_path('.env'), file_get_contents(__DIR__ . '/../stubs/env.txt'));
         }
 
         $this->info('Installed Manta Uploads module');
@@ -77,6 +77,6 @@ class InstallMantaLaravelUploads extends Command
             $params['--force'] = true;
         }
 
-       $this->call('vendor:publish', $params);
+        $this->call('vendor:publish', $params);
     }
 }

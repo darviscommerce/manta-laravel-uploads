@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('seo_title')->nullable();
             $table->boolean('private')->default(0);
             $table->string('disk')->nullable();
+            $table->text('url')->nullable();
             $table->string('location')->nullable();
             $table->string('filename')->nullable();
             $table->string('extension')->nullable();
