@@ -166,8 +166,6 @@ class MantaUpload extends Model
             $url = env('APP_URL') . '/';
         }
 
-
-
         if (is_string($file) && !is_object($file)) {
             if (isset($config['replace']) && !$upload) {
                 return false;
